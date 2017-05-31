@@ -1,0 +1,32 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="todo-websockets-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]!</h2>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class TodoWebsocketsApp extends Polymer.Element {
+      static get is() { return 'todo-websockets-app'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'todo-websockets-app'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(TodoWebsocketsApp.is, TodoWebsocketsApp);
+  </script>
+</dom-module>

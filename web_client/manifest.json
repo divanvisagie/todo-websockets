@@ -1,0 +1,7 @@
+{
+  "name": "todo-websockets",
+  "short_name": "todo-websockets",
+  "description": "A websocket based todo example",
+  "start_url": "/",
+  "display": "standalone"
+}
