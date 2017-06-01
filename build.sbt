@@ -1,4 +1,14 @@
-import Dependencies._
+import sbt.Keys._
+
+
+val versions = new {
+  val akka       = "2.4.16"
+  val akkaHttp   = "10.0.1"
+  val scalaTest  = "3.0.1"
+  val mockito    = "1.10.19"
+  val circe      = "0.7.0"
+}
+
 
 lazy val root = (project in file(".")).
   settings(
@@ -8,5 +18,11 @@ lazy val root = (project in file(".")).
       version      := "0.1.0-SNAPSHOT"
     )),
     name := "Hello",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % versions.scalaTest % "test",
+      "com.typesafe.akka" %% "akka-actor" % versions.akka,
+      "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
+      "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp,
+      "io.circe" %% "circe-generic" % versions.circe
+    )
   )
