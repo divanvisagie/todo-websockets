@@ -43,5 +43,6 @@ object Hello extends App {
   val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 8080)
 
   println("Hello World")
+
 }
 
