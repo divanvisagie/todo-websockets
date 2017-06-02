@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="stylesheet" href="../../bower_components/app-layout/app-layout.html">
 
 <dom-module id="todo-websockets-app">
   <template>
@@ -7,7 +8,19 @@
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+
+    <app-header-layout >
+      <app-header fixed condenses effects="waterfall">
+        <app-toolbar>
+          <div main-title>Todo</div>
+        </app-toolbar>
+      </app-header>
+      <div>
+        <h2>Hello [[prop1]]!</h2>
+      </div>
+    </app-header-layout>
+
+
   </template>
 
   <script>

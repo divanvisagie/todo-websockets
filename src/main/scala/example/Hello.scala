@@ -22,6 +22,7 @@ object Hello extends App {
 
   val staticResources =
     pathPrefix("") {
+
 //        pathEnd {
 //          redirect("/api/swagger/", StatusCodes.TemporaryRedirect)
 //        } ~
