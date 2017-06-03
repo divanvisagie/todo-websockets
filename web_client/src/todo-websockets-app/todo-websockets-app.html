@@ -44,7 +44,7 @@
      */
     class TodoWebsocketsApp extends Polymer.Element {
       static get is() {
-        return 'todo-websockets-app';
+        return 'todo-websockets-app'
       }
       static get properties() {
         return {
@@ -56,35 +56,33 @@
             type: Object,
             value: {}
           }
-        };
+        }
       }
       ready() {
-        super.ready();
+        super.ready()
 
-        this.connection = new WebSocket("ws://0.0.0.0:5000/todo");
+        this.connection = new WebSocket("ws://0.0.0.0:5000/todo")
 
         this.connection.onerror = error => {
-          console.log('Websocket Error', error);
+          console.log('Websocket Error', error)
         };
 
         this.connection.onopen = () => {
-          console.log('connected');
+          console.log('connected')
           this.connection.send('John')
         };
 
         this.connection.onmessage = event => {
-          console.log(event);
+          console.log(event)
         };
       }
       _addTodo(e) {
-        const todo = e.detail.todo;
+        const todo = e.detail.todo
         console.log("add todo", todo)
-        this.connection.send(JSON.stringify({
-          text: todo
-        }))
+        this.connection.send(todo)
       }
     }
 
-    window.customElements.define(TodoWebsocketsApp.is, TodoWebsocketsApp);
+    window.customElements.define(TodoWebsocketsApp.is, TodoWebsocketsApp)
   </script>
 </dom-module>

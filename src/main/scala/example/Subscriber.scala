@@ -1,7 +1,7 @@
 package example
 
 import akka.actor.{Actor, ActorRef, Terminated}
-import example.User.{IncomingMessage, OutgoingMessage}
+import example.Subscriber.{IncomingMessage, OutgoingMessage}
 import akka.NotUsed
 import akka.actor._
 import akka.http.scaladsl._
@@ -14,34 +14,34 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import scala.io.StdIn
 
-class User(room: ActorRef) extends Actor{
-  import User._
+class Subscriber(room: ActorRef) extends Actor{
+  import Subscriber._
 
   def receive = {
     case Connected(outgoing: ActorRef) =>
       context.become(connected(outgoing))
     case _ => {
-      println(User.toString +" Unhandled Message")
+      println(Subscriber.toString +" Unhandled Message")
     }
   }
 
   def connected(outgoing: ActorRef): Receive = {
     println("New user connected")
-    room ! SocketConnectionHandler.Join
+    room ! TodoCollectionHandler.Join
 
     {
-      case User.IncomingMessage(text: String) =>
+      case Subscriber.IncomingMessage(text: String) =>
         println(s"Incoming message $text")
-        room ! SocketConnectionHandler.ChatMessage(text)
+        room ! TodoCollectionHandler.NewTodoMessage(text)
 
-      case SocketConnectionHandler.ChatMessage(text: String) =>
+      case TodoCollectionHandler.ChatMessage(text: String) =>
         println(s"Received chat message $text")
         outgoing ! OutgoingMessage(text)
     }
   }
 }
 
-object User {
+object Subscriber {
   final case class Connected(actorRef: ActorRef)
   case class IncomingMessage(text: String)
   case class OutgoingMessage(text: String)
