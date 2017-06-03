@@ -2,8 +2,6 @@ package example
 
 import akka.actor.{Actor, ActorRef, Terminated}
 
-import scala.collection.mutable
-
 class TodoCollectionHandler extends Actor {
   import TodoCollectionHandler._
 

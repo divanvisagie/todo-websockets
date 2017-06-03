@@ -46,7 +46,7 @@ object Hello extends App {
 
   val staticResources =
     pathPrefix("") {
-        pathSingleSlash {
+        pathEndOrSingleSlash {
           getFromDirectory("web_client/build/default/index.html")
         } ~
         getFromDirectory("web_client/build/default")
