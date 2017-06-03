@@ -1,13 +1,14 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-styles/element-styles/paper-material-styles.html">
 <link rel="import" href="../../bower_components/paper-styles/demo-pages.html">
 
 <link rel="import" href="elements/todo-adder.html">
 
 <dom-module id="todo-websockets-app">
   <template>
-    <style is="custom-style">
+    <style is="custom-style" include="paper-material-styles">
        :host {
         display: block;
       }
@@ -15,6 +16,22 @@
       app-toolbar {
         background-color: var(--paper-blue-500);
         color: #fff;
+      }
+
+      .content {
+        margin-top: 20px;
+      }
+
+      .todo {
+        width: 100%;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
+        border-bottom: solid 1px lightgray;
+      }
+
+      .paper-material {
+        background-color: white;
       }
     </style>
 
@@ -28,8 +45,12 @@
 
         <todo-adder on-todo-added="_addTodo"></todo-adder>
 
-        <div class="paper-material">
-          This is where things go
+        <div class="content paper-material">
+          <div class="paper-material" elevation="1">
+            <template is="dom-repeat" items="[[todos]]">
+              <div class="todo">[[item]]</div>
+            </template>
+          </div>
         </div>
       </div>
     </app-header-layout>
@@ -55,6 +76,11 @@
           connection: {
             type: Object,
             value: {}
+          },
+          todos: {
+            type: Array,
+            notify: true,
+            value: []
           }
         }
       }
@@ -68,12 +94,13 @@
         };
 
         this.connection.onopen = () => {
-          console.log('connected')
-          this.connection.send('John')
+          console.log('connected to server')
         };
 
         this.connection.onmessage = event => {
-          console.log(event)
+          console.log(event.data)
+          const todos = event.data.split(',')
+          this.set('todos', todos)
         };
       }
       _addTodo(e) {
