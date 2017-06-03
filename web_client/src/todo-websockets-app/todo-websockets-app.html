@@ -42,10 +42,6 @@
         super.ready();
 
         let connection = new WebSocket("ws://localhost:8080/todo");
-        setInterval(() => {
-          console.log("sending Bobby message");
-          connection.send("Bobby");
-        },2000);
 
         connection.onerror = error => {
           console.log('Websocket Error', error);
