@@ -12,7 +12,7 @@ import scala.collection.mutable
 
 
 case class Todo(text: String, uid: String)
-case class TodoAction(action: String, text: String)
+case class NewTodo(text: String)
 
 class TodoCollectionHandler extends Actor {
   import TodoCollectionHandler._
@@ -28,17 +28,10 @@ class TodoCollectionHandler extends Actor {
     subscriber ! ListUpdatedMessage(todoString)
   }
 
-  def handleTodoAction(todoAction: TodoAction): Unit = {
-    todoAction.action.toLowerCase match {
-      case "add" =>
-        val uid = uuid
-        val todo = Todo(todoAction.text, uid)
-        todos += (uid -> todo)
-      case _ => log.warning("Unsupported action")
-    }
-
+  def updateSubscribers(): Unit = {
+    val todosJsonString = todos.values.asJson.toString()
     subscribers.foreach { subscriber =>
-      subscriber ! ListUpdatedMessage(todos.values.asJson.toString())
+      subscriber ! ListUpdatedMessage(todosJsonString)
     }
   }
 
@@ -52,11 +45,16 @@ class TodoCollectionHandler extends Actor {
       subscribers -= user
 
     case newTodoMessage: SubscriberMessage =>
-      decode[TodoAction](newTodoMessage.message).map {
-        case todoAction: TodoAction =>
-          handleTodoAction(todoAction)
-        case _ =>
-          log.error("Failed to parse json message")
+//      decode[Todo](newTodoMessage.message).map {
+//        todo: Todo =>
+//          todos(todo.uid) = todo
+//      }
+      decode[NewTodo](newTodoMessage.message).map {
+        newTodo: NewTodo =>
+          val uid = uuid
+          val todo = Todo(newTodo.text, uid)
+          todos += (uid -> todo)
+          updateSubscribers()
       }
 
     case msg: ListUpdatedMessage => {
