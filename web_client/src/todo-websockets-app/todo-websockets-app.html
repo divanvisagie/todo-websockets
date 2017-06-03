@@ -104,6 +104,7 @@
       }
       _addTodo(e) {
         const todo = JSON.stringify({
+          action: 'add',
           text: e.detail.todo
         })
         console.log("add todo",todo)
