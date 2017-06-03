@@ -15,13 +15,12 @@ case class Todo(text: String)
 class TodoCollectionHandler extends Actor {
   import TodoCollectionHandler._
   val log = Logging(context.system, this)
-//  implicit val fooDecoder: Decoder[Todo] = deriveDecoder[Todo]
 
   var subscribers: Set[ActorRef] = Set.empty
   var todos: Set[Todo] = Set.empty
 
   def sendTodosTo(subscriber: ActorRef): Unit = {
-    val todoString = todos.mkString(",")
+    val todoString = todos.asJson.toString()
     subscriber ! ListUpdatedMessage(todoString)
   }
 
