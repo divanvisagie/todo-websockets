@@ -16,7 +16,7 @@ class Subscriber(room: ActorRef) extends Actor{
 
   def connected(outgoing: ActorRef): Receive = {
     case Subscriber.IncomingMessage(text: String) =>
-      log.debug(s"Received incoming message $text")
+      log.info(s"Received incoming message $text")
       room ! TodoCollectionHandler.NewTodoMessage(text)
 
     case TodoCollectionHandler.ListUpdatedMessage(text: String) =>

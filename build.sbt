@@ -25,7 +25,11 @@ lazy val root = (project in file(".")).
       "com.typesafe.akka" %% "akka-testkit" % versions.akka,
       "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
       "com.typesafe.akka" %% "akka-http-spray-json" % versions.akkaHttp,
-      "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp,
-      "io.circe" %% "circe-generic" % versions.circe
-    )
+      "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp
+    ),
+    libraryDependencies ++= Seq(
+      "io.circe" %% "circe-core",
+      "io.circe" %% "circe-generic",
+      "io.circe" %% "circe-parser"
+    ).map(_ % versions.circe)
   )
