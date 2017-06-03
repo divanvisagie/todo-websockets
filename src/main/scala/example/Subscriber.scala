@@ -1,32 +1,19 @@
 package example
 
-import akka.actor.{Actor, ActorRef, Terminated}
-import example.Subscriber.{IncomingMessage, OutgoingMessage}
-import akka.NotUsed
-import akka.actor._
-import akka.http.scaladsl._
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.ws.Message
-import akka.stream._
-import akka.stream.scaladsl._
-
-import scala.concurrent.duration._
-import scala.concurrent.Await
-import scala.io.StdIn
+import akka.actor.{Actor, ActorRef, _}
+import akka.event.Logging
 
 class Subscriber(room: ActorRef) extends Actor{
   import Subscriber._
+  val log = Logging(context.system, this)
 
   def receive = {
     case Connected(outgoing: ActorRef) =>
       context.become(connected(outgoing))
-    case _ => {
-      println(Subscriber.toString +" Unhandled Message")
-    }
   }
 
   def connected(outgoing: ActorRef): Receive = {
-    println("New user connected")
+    log.debug("New user connected")
     room ! TodoCollectionHandler.Join
 
     {
@@ -34,7 +21,7 @@ class Subscriber(room: ActorRef) extends Actor{
         println(s"Incoming message $text")
         room ! TodoCollectionHandler.NewTodoMessage(text)
 
-      case TodoCollectionHandler.ChatMessage(text: String) =>
+      case TodoCollectionHandler.ListUpdatedMessage(text: String) =>
         println(s"Received chat message $text")
         outgoing ! OutgoingMessage(text)
     }

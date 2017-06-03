@@ -1,16 +1,18 @@
 package example
 
 import akka.actor.{Actor, ActorRef, Terminated}
+import akka.event.Logging
 
 class TodoCollectionHandler extends Actor {
   import TodoCollectionHandler._
+  val log = Logging(context.system, this)
 
   var subscribers: Set[ActorRef] = Set.empty
   var todos: Set[String] = Set.empty
 
   def sendTodosTo(subscriber: ActorRef): Unit = {
     val todoString = todos.mkString(",")
-    subscriber ! ChatMessage(todoString)
+    subscriber ! ListUpdatedMessage(todoString)
   }
 
   def receive = {
@@ -26,11 +28,11 @@ class TodoCollectionHandler extends Actor {
       todos += todo.message
       val todoString = todos.mkString(",")
       subscribers.foreach { subscriber =>
-        subscriber ! ChatMessage(todoString)
+        subscriber ! ListUpdatedMessage(todoString)
       }
 
-    case msg: ChatMessage => {
-      println("Relaying the chat message to others")
+    case msg: ListUpdatedMessage => {
+      log.debug("Relaying the chat message to others")
       subscribers.foreach(_ ! msg)
     }
   }
@@ -39,5 +41,5 @@ class TodoCollectionHandler extends Actor {
 object TodoCollectionHandler {
   case object Join
   case class NewTodoMessage(message: String)
-  case class ChatMessage(message: String)
+  case class ListUpdatedMessage(message: String)
 }

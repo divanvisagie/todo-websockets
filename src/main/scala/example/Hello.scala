@@ -68,7 +68,7 @@ object Hello extends App {
   val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 5000)
 
   def sendMessageToClient(): Unit = {
-    socketConnectionHandler ! TodoCollectionHandler.ChatMessage("This is your server speaking")
+    socketConnectionHandler ! TodoCollectionHandler.ListUpdatedMessage("This is your server speaking")
   }
 //  system.scheduler.schedule(0 seconds, 1 seconds)(sendMessageToClient())
 
