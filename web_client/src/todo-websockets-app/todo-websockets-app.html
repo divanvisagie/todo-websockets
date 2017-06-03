@@ -104,8 +104,10 @@
         };
       }
       _addTodo(e) {
-        const todo = e.detail.todo
-        console.log("add todo", todo)
+        const todo = JSON.stringify({
+          text: e.detail.todo
+        })
+        console.log("add todo",todo);
         this.connection.send(todo)
       }
     }
