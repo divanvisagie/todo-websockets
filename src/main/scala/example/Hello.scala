@@ -10,9 +10,13 @@ import akka.stream.{ActorMaterializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.http.scaladsl.model.StatusCodes
 import example.User.OutgoingMessage
+import scala.concurrent.duration._
 
 
 object Hello extends App {
+  import scala.concurrent.ExecutionContext
+  import ExecutionContext.Implicits.global
+
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
@@ -68,6 +72,10 @@ object Hello extends App {
 
   val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 8080)
 
+  def sendMessageToClient(): Unit = {
+    socketConnectionHandler ! SocketConnectionHandler.ChatMessage("This is your server speaking")
+  }
+  system.scheduler.schedule(0 seconds, 1 seconds)(sendMessageToClient())
 
   println("Hello World")
 
