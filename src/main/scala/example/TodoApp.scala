@@ -3,14 +3,10 @@ package example
 import akka.NotUsed
 import akka.actor.{ActorSystem, PoisonPill, Props}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
-import akka.stream.{ActorMaterializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.http.scaladsl.model.StatusCodes
-import example.Subscriber.OutgoingMessage
-import scala.concurrent.duration._
+import akka.stream.{ActorMaterializer, OverflowStrategy}
 
 
 object TodoApp extends App {
@@ -19,7 +15,6 @@ object TodoApp extends App {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
-
   val socketConnectionHandler = system.actorOf(Props(new TodoCollectionHandler), "todoRoom")
 
 
@@ -54,25 +49,20 @@ object TodoApp extends App {
 
   val route =
     staticResources ~
-    path("ping") {
-      get {
-        complete("pong")
-      }
-    } ~
     path ("todo") {
       get {
         handleWebSocketMessages(newConnection())
       }
     }
 
-  val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 5000)
+  val port = 5000
+  val ip = "0.0.0.0"
+  val bindingFuture = Http().bindAndHandle(route, ip, port)
 
   def sendMessageToClient(): Unit = {
     socketConnectionHandler ! TodoCollectionHandler.ListUpdatedMessage("This is your server speaking")
   }
-//  system.scheduler.schedule(0 seconds, 1 seconds)(sendMessageToClient())
 
-  println("Hello World")
-
+  println(s"Served at http://$ip:$port")
 }
 
