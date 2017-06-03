@@ -1,0 +1,52 @@
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-styles/color.html">
+<dom-module id="todo-adder">
+   <template>
+       <style>
+           :host {
+               display: block;
+           }
+           paper-button {
+               background-color: var(--paper-blue-500);
+               color: #fff;
+           }
+       </style>
+
+       <div>
+           <paper-input label="Todo" value="{{todo}}"></paper-input>
+           <paper-button raised on-tap="_addTodo">Add</paper-button>
+       </div>
+   </template> 
+   <script>
+       'use strict'
+
+       class TodoAdder extends Polymer.Element {
+           static get is() {
+               return 'todo-adder'
+           }
+           static get properties() {
+               return {
+                    todo: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    }
+               }
+           }
+           _addTodo() {
+               const todo = this.todo;
+               this.dispatchEvent(new CustomEvent(
+                   'todo-added',
+                   {
+                       detail: {
+                           todo
+                       }
+                   }
+               ))
+           }
+       }
+
+       window.customElements.define(TodoAdder.is, TodoAdder)
+   </script>
+</dom-module>

@@ -1,22 +1,36 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="stylesheet" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-styles/demo-pages.html">
+
+<link rel="import" href="elements/todo-adder.html">
 
 <dom-module id="todo-websockets-app">
   <template>
-    <style>
-      :host {
+    <style is="custom-style">
+       :host {
         display: block;
+      }
+
+      app-toolbar {
+        background-color: var(--paper-blue-500);
+        color: #fff;
       }
     </style>
 
-    <app-header-layout >
+    <app-header-layout>
       <app-header fixed condenses effects="waterfall">
         <app-toolbar>
-          <div main-title>Todo</div>
+          <div main-title>Todo Websocket Example</div>
         </app-toolbar>
       </app-header>
       <div>
-        <h2>Hello [[prop1]]!</h2>
+
+        <todo-adder on-todo-added="_addTodo"></todo-adder>
+
+        <div class="paper-material">
+          This is where things go
+        </div>
       </div>
     </app-header-layout>
 
@@ -29,32 +43,45 @@
      * @polymer
      */
     class TodoWebsocketsApp extends Polymer.Element {
-      static get is() { return 'todo-websockets-app'; }
+      static get is() {
+        return 'todo-websockets-app';
+      }
       static get properties() {
         return {
           prop1: {
             type: String,
             value: 'todo-websockets-app'
+          },
+          connection: {
+            type: Object,
+            value: {}
           }
         };
       }
-      ready () {
+      ready() {
         super.ready();
 
-        let connection = new WebSocket("ws://localhost:8080/todo");
+        this.connection = new WebSocket("ws://0.0.0.0:5000/todo");
 
-        connection.onerror = error => {
+        this.connection.onerror = error => {
           console.log('Websocket Error', error);
         };
 
-        connection.onopen = () => {
+        this.connection.onopen = () => {
           console.log('connected');
-          connection.send('John')
+          this.connection.send('John')
         };
 
-        connection.onmessage = event => {
+        this.connection.onmessage = event => {
           console.log(event);
         };
+      }
+      _addTodo(e) {
+        const todo = e.detail.todo;
+        console.log("add todo", todo)
+        this.connection.send(JSON.stringify({
+          text: todo
+        }))
       }
     }
 
