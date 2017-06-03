@@ -14,7 +14,7 @@
        </style>
 
        <div>
-           <paper-input label="Todo" value="{{todo}}"></paper-input>
+           <paper-input required id="input" label="Todo" value="{{todo}}"></paper-input>
            <paper-button raised on-tap="_addTodo">Add</paper-button>
        </div>
    </template> 
@@ -35,6 +35,9 @@
                }
            }
            _addTodo() {
+               if(!this.$.input.validate()) {
+                   return
+               }
                const todo = this.todo;
                this.dispatchEvent(new CustomEvent(
                    'todo-added',
@@ -45,6 +48,7 @@
                    }
                ))
                this.todo = ""
+               this.$.input.focus()
            }
        }
 
