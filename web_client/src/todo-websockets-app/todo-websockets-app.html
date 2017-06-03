@@ -48,7 +48,7 @@
         <div class="content paper-material">
           <div class="paper-material" elevation="1">
             <template is="dom-repeat" items="[[todos]]">
-              <div class="todo">[[item]]</div>
+              <div class="todo">[[item.text]]</div>
             </template>
           </div>
         </div>
@@ -99,15 +99,14 @@
 
         this.connection.onmessage = event => {
           console.log(event.data)
-          const todos = event.data.split(',')
-          this.set('todos', todos)
+          this.set('todos', JSON.parse(event.data))
         };
       }
       _addTodo(e) {
         const todo = JSON.stringify({
           text: e.detail.todo
         })
-        console.log("add todo",todo);
+        console.log("add todo",todo)
         this.connection.send(todo)
       }
     }
