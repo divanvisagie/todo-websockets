@@ -7,24 +7,21 @@ class Subscriber(room: ActorRef) extends Actor{
   import Subscriber._
   val log = Logging(context.system, this)
 
-  def receive = {
+  def receive: Receive = {
     case Connected(outgoing: ActorRef) =>
+      log.debug("New subscriber connected")
+      room ! TodoCollectionHandler.Join
       context.become(connected(outgoing))
   }
 
   def connected(outgoing: ActorRef): Receive = {
-    log.debug("New user connected")
-    room ! TodoCollectionHandler.Join
+    case Subscriber.IncomingMessage(text: String) =>
+      log.debug(s"Received incoming message $text")
+      room ! TodoCollectionHandler.NewTodoMessage(text)
 
-    {
-      case Subscriber.IncomingMessage(text: String) =>
-        println(s"Incoming message $text")
-        room ! TodoCollectionHandler.NewTodoMessage(text)
-
-      case TodoCollectionHandler.ListUpdatedMessage(text: String) =>
-        println(s"Received chat message $text")
-        outgoing ! OutgoingMessage(text)
-    }
+    case TodoCollectionHandler.ListUpdatedMessage(text: String) =>
+      log.debug(s"Received list update message $text")
+      outgoing ! OutgoingMessage(text)
   }
 }
 

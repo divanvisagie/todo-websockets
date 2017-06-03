@@ -15,7 +15,7 @@ class TodoCollectionHandler extends Actor {
     subscriber ! ListUpdatedMessage(todoString)
   }
 
-  def receive = {
+  def receive: Receive = {
     case Join =>
       subscribers += sender()
       sendTodosTo(sender())

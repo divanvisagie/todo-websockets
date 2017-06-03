@@ -13,7 +13,7 @@ import example.Subscriber.OutgoingMessage
 import scala.concurrent.duration._
 
 
-object Hello extends App {
+object TodoApp extends App {
   import scala.concurrent.ExecutionContext
   import ExecutionContext.Implicits.global
 
