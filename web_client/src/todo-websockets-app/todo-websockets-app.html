@@ -5,6 +5,7 @@
 <link rel="import" href="../../bower_components/paper-styles/demo-pages.html">
 
 <link rel="import" href="elements/todo-adder.html">
+<link rel="import" href="elements/todo-item.html">
 
 <dom-module id="todo-websockets-app">
   <template>
@@ -48,7 +49,7 @@
         <div class="content paper-material">
           <div class="paper-material" elevation="1">
             <template is="dom-repeat" items="[[todos]]">
-              <div class="todo">[[item.text]]</div>
+              <todo-item todo="[[item]]" on-todo-changed="_editTodo"></todo-item>
             </template>
           </div>
         </div>
@@ -104,10 +105,15 @@
       }
       _addTodo(e) {
         const todo = JSON.stringify({
-          action: 'add',
           text: e.detail.todo
         })
         console.log("add todo",todo)
+        this.connection.send(todo)
+      }
+      _editTodo(e) {
+        console.log(e)
+        const todo = JSON.stringify(e.detail.todo)
+        console.log("edit todo", todo)
         this.connection.send(todo)
       }
     }

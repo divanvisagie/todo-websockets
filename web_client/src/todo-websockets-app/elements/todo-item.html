@@ -1,0 +1,82 @@
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<dom-module id="todo-item">
+    <template>
+        <style>
+            :host {
+                display: block;
+                width: 100%;
+                text-align: center;
+                padding: 20px;
+                box-sizing: border-box;
+                border-bottom: solid 1px lightgray;
+            }
+
+            #input {
+                max-width: 400px;
+            }
+        </style>
+
+        <div>
+            <div hidden$="[[editing]]">
+                [[todo.text]]
+                <paper-button on-tap="_edit">Edit</paper-button>
+            </div>
+            <div hidden$="[[!editing]]">
+                <paper-input id="input" value="{{editValue}}"></paper-input>
+                <paper-button focused on-tap="_save" raised>Save</paper-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        'use strict'
+
+        class TodoItem extends Polymer.Element {
+            static get is() {
+                return 'todo-item'
+            }
+            static get properties() {
+                return {
+                    todo: {
+                        type: Object,
+                        notify: true,
+                        value: ''
+                    },
+                    editValue: {
+                        type: String,
+                        notify: true,
+                        value: ''
+                    },
+                    editing: {
+                        type: Boolean,
+                        notify: true,
+                        value: false
+                    }
+                }
+            }
+            _edit(e) {
+                this.editValue = this.todo.text
+                this.editing = true
+                this.$.input.focus()
+            }
+            _save(e) {
+                const text = this.editValue;
+                const uid = this.todo.uid;
+                this.dispatchEvent(new CustomEvent(
+                    'todo-changed', {
+                        detail: {
+                            todo: {
+                                uid: uid,
+                                text: text
+                            }
+
+                        }
+                    }
+                ))
+                this.editing = false
+            }
+        }
+
+        window.customElements.define(TodoItem.is, TodoItem)
+    </script>
+</dom-module>

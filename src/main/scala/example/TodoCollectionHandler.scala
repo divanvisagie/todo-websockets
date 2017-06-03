@@ -11,7 +11,7 @@ import io.circe.generic.semiauto._
 import scala.collection.mutable
 
 
-case class Todo(text: String, uid: String)
+case class Todo(uid: String, text: String)
 case class NewTodo(text: String)
 
 class TodoCollectionHandler extends Actor {
@@ -45,16 +45,26 @@ class TodoCollectionHandler extends Actor {
       subscribers -= user
 
     case newTodoMessage: SubscriberMessage =>
-//      decode[Todo](newTodoMessage.message).map {
-//        todo: Todo =>
-//          todos(todo.uid) = todo
-//      }
-      decode[NewTodo](newTodoMessage.message).map {
-        newTodo: NewTodo =>
-          val uid = uuid
-          val todo = Todo(newTodo.text, uid)
-          todos += (uid -> todo)
+      val isEdit = decode[Todo](newTodoMessage.message) match {
+        case Right(todo) =>
+          log.info("editing existing item")
+          todos(todo.uid) = todo
           updateSubscribers()
+          true
+        case Left(error) =>
+          log.info(s"could not make into a todo $error")
+          false
+      }
+      if (!isEdit) {
+        decode[NewTodo](newTodoMessage.message) match {
+          case Right(newTodo) =>
+            val uid = uuid
+            val todo = Todo(uid, newTodo.text)
+            todos += (uid -> todo)
+            updateSubscribers()
+          case Left(error) =>
+            log.info(s"could not make into a newTodo $error")
+        }
       }
 
     case msg: ListUpdatedMessage => {
