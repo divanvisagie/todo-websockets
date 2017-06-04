@@ -1,5 +1,7 @@
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../bower_components/paper-icon-button/paper-icon-button.html">
 <dom-module id="todo-item">
     <template>
         <style>
@@ -21,6 +23,7 @@
             <div hidden$="[[editing]]">
                 [[todo.text]]
                 <paper-button on-tap="_edit">Edit</paper-button>
+                <paper-icon-button icon="delete" on-tap="_delete"></paper-icon-button>
             </div>
             <div hidden$="[[!editing]]">
                 <paper-input id="input" value="{{editValue}}"></paper-input>
@@ -60,8 +63,9 @@
                 this.$.input.focus()
             }
             _save(e) {
-                const text = this.editValue;
-                const uid = this.todo.uid;
+                const text = this.editValue
+                const uid = this.todo.uid
+
                 this.dispatchEvent(new CustomEvent(
                     'todo-changed', {
                         detail: {
@@ -74,6 +78,20 @@
                     }
                 ))
                 this.editing = false
+            }
+
+            _delete(e) {
+                const uid = this.todo.uid
+
+                this.dispatchEvent(new CustomEvent(
+                    'todo-deleted', {
+                        detail: {
+                            todo: {
+                                uid: uid
+                            }
+                        }
+                    }
+                ))
             }
         }
 

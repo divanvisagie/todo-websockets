@@ -2,7 +2,7 @@ package example
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
-import example.CollectionHandler.{AddMessage, UpdateMessage}
+import example.CollectionHandler.{AddMessage, DeleteMessage, UpdateMessage}
 
 import scala.collection.mutable
 
@@ -33,6 +33,8 @@ class SubscriptionHandler extends Actor {
           collections(messageMetadata.collection) ! UpdateMessage(messageMetadata.data)
         case "ADD" =>
           collections(messageMetadata.collection) ! AddMessage(messageMetadata.data)
+        case "DELETE" =>
+          collections(messageMetadata.collection) ! DeleteMessage(messageMetadata.data)
         case _ => log.info(s"Action: ${messageMetadata.action} is not a supported action")
       }
 

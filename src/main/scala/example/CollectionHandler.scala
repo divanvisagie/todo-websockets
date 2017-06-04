@@ -11,6 +11,7 @@ import scala.collection.mutable
 
 case class Todo(uid: String, text: String)
 case class NewTodo(text: String)
+case class DeleteTodo(uid: String)
 
 class CollectionHandler(collectionName: String) extends Actor {
   import CollectionHandler._
@@ -58,10 +59,20 @@ class CollectionHandler(collectionName: String) extends Actor {
         case Left(error) =>
           log.info(s"Unable to parse todo: $error")
       }
+
+    case DeleteMessage(data) =>
+      decode[DeleteTodo](data) match {
+        case Right(todo) =>
+          todos.remove(todo.uid)
+          updateEveryone()
+        case Left(error) =>
+          log.info(s"Unable to parse error: $error")
+      }
   }
 }
 object CollectionHandler {
   case class Subscribe(subscriber: ActorRef)
   case class UpdateMessage(data: String)
   case class AddMessage(data: String)
+  case class DeleteMessage(data: String)
 }

@@ -49,7 +49,7 @@
         <div class="content paper-material">
           <div class="paper-material" elevation="1">
             <template is="dom-repeat" items="[[todos]]">
-              <todo-item todo="[[item]]" on-todo-changed="_editTodo"></todo-item>
+              <todo-item todo="[[item]]" on-todo-changed="_editTodo" on-todo-deleted="_deleteTodo"></todo-item>
             </template>
           </div>
         </div>
@@ -117,6 +117,12 @@
       _editTodo(e) {
         const todoDataPacket = JSON.stringify(e.detail.todo)
         const command = `UPDATE:todos => ${todoDataPacket}`
+        console.log(command)
+        this.connection.send(command)
+      }
+      _deleteTodo(e) {
+        const todoDataPacket = JSON.stringify(e.detail.todo)
+        const command = `DELETE:todos => ${todoDataPacket}`
         console.log(command)
         this.connection.send(command)
       }
