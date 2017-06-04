@@ -87,7 +87,7 @@ object SubscriptionHandler {
       MessageMetadata(
         action = action,
         collection = collection,
-        data = data
+        data = data.trim
       )
     }
 
