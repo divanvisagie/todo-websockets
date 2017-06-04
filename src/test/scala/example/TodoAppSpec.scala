@@ -13,7 +13,7 @@ class TodoAppSpec extends FlatSpec with Matchers {
 class SubscriptionHandlerSpec extends FlatSpec with Matchers {
   "Parsing 'SUBSCRIBE:todos'" should
     "return action==SUBSCRIBE and collection==todos and data==''" in {
-    val messageMetadata: MessageMetadata = SubscriptionHandler.parseSubscriberMessage("SUBSCRIBE:todos")
+    val messageMetadata: MessageMetadata = SubscriptionHandler.parseSubscriberMessageMetadata("SUBSCRIBE:todos")
     messageMetadata.action     shouldEqual "SUBSCRIBE"
     messageMetadata.collection shouldEqual "todos"
     messageMetadata.data       shouldEqual ""
@@ -21,7 +21,7 @@ class SubscriptionHandlerSpec extends FlatSpec with Matchers {
 
   "parsing 'UPDATE: TODOS => data'" should
     "return action==UPDATE and collection==todos and data==data" in {
-    val messageMetadata = SubscriptionHandler.parseSubscriberMessage("UPDATE:todos => data")
+    val messageMetadata = SubscriptionHandler.parseSubscriberMessageMetadata("UPDATE:todos => data")
     messageMetadata.action     shouldEqual "UPDATE"
     messageMetadata.collection shouldEqual "todos"
     messageMetadata.data       shouldEqual "data"

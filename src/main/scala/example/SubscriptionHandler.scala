@@ -24,7 +24,7 @@ class SubscriptionHandler extends Actor {
 
   def receive: Receive = {
     case subscriberMessage: SubscriberMessage =>
-      val messageMetadata = parseSubscriberMessage(subscriberMessage.message)
+      val messageMetadata = parseSubscriberMessageMetadata(subscriberMessage.message)
 
       messageMetadata.action match {
         case "SUBSCRIBE" =>
@@ -47,7 +47,7 @@ object SubscriptionHandler {
   case class ListUpdatedMessage(message: String)
   case class SubscriptionMessage(collection: String)
 
-  def parseSubscriberMessage(message: String): MessageMetadata = {
+  def parseSubscriberMessageMetadata(message: String): MessageMetadata = {
     val splitData = message.split("=>")
 
     val metaSection = splitData(0).trim
