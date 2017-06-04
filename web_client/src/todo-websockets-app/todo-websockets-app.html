@@ -88,7 +88,7 @@
       ready() {
         super.ready()
 
-        this.connection = new WebSocket("ws://0.0.0.0:5000/todo")
+        this.connection = new WebSocket("ws://0.0.0.0:5000/database")
 
         this.connection.onerror = error => {
           console.log('Websocket Error', error)
@@ -96,6 +96,9 @@
 
         this.connection.onopen = () => {
           console.log('connected to server')
+          const dataPacket = JSON.stringify({ collection: 'todos' })
+          const command = `SUBSCRIBE => ${dataPacket}`
+          this.connection.send(command)
         };
 
         this.connection.onmessage = event => {

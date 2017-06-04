@@ -8,31 +8,28 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 
-
 object TodoApp extends App {
   import scala.concurrent.ExecutionContext
   import ExecutionContext.Implicits.global
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
-  val socketConnectionHandler = system.actorOf(Props(new TodoCollectionHandler), "todoRoom")
-
-
+  val subscriptionHandler = system.actorOf(Props(new SubscriptionHandler), "subscriptionHandler")
 
   def newConnection(): Flow[Message, Message, NotUsed] = {
-    val userActor = system.actorOf(Props(new Subscriber(socketConnectionHandler)))
+    val subscriberActor = system.actorOf(Props(new Subscriber(subscriptionHandler)))
 
     val incomingMessages: Sink[Message, NotUsed] = Flow[Message].map {
       case TextMessage.Strict(text) => Subscriber.IncomingMessage(text)
       case _ =>
         println("Unexpected message type")
         Subscriber.IncomingMessage("Unexpected message")
-    }.to(Sink.actorRef[Subscriber.IncomingMessage](userActor, PoisonPill))
+    }.to(Sink.actorRef[Subscriber.IncomingMessage](subscriberActor, PoisonPill))
 
     val outgoingMessages: Source[Message, NotUsed] =
       Source.actorRef[Subscriber.OutgoingMessage](10, OverflowStrategy.fail)
           .mapMaterializedValue { outActor =>
-            userActor ! Subscriber.Connected(outActor)
+            subscriberActor ! Subscriber.Connected(outActor)
             NotUsed
           }.map { outMsg: Subscriber.OutgoingMessage => TextMessage(outMsg.text)}
 
@@ -49,7 +46,7 @@ object TodoApp extends App {
 
   val route =
     staticResources ~
-    path ("todo") {
+    path ("database") {
       get {
         handleWebSocketMessages(newConnection())
       }
@@ -60,7 +57,7 @@ object TodoApp extends App {
   val bindingFuture = Http().bindAndHandle(route, ip, port)
 
   def sendMessageToClient(): Unit = {
-    socketConnectionHandler ! TodoCollectionHandler.ListUpdatedMessage("This is your server speaking")
+    subscriptionHandler ! SubscriptionHandler.ListUpdatedMessage("This is your server speaking")
   }
 
   println(s"Served at http://$ip:$port")
