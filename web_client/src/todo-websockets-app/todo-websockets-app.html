@@ -96,8 +96,8 @@
 
         this.connection.onopen = () => {
           console.log('connected to server')
-          const dataPacket = JSON.stringify({ collection: 'todos' })
-          const command = `SUBSCRIBE => ${dataPacket}`
+          const command = `SUBSCRIBE:todos`
+          console.log(command)
           this.connection.send(command)
         };
 
@@ -107,17 +107,18 @@
         };
       }
       _addTodo(e) {
-        const todo = JSON.stringify({
+        const todoDataPacket = JSON.stringify({
           text: e.detail.todo
         })
-        console.log("add todo",todo)
-        this.connection.send(todo)
+        const command = `ADD:todos => ${todoDataPacket}`
+        console.log(command)
+        this.connection.send(command)
       }
       _editTodo(e) {
-        console.log(e)
-        const todo = JSON.stringify(e.detail.todo)
-        console.log("edit todo", todo)
-        this.connection.send(todo)
+        const todoDataPacket = JSON.stringify(e.detail.todo)
+        const command = `UPDATE:todos => ${todoDataPacket}`
+        console.log(command)
+        this.connection.send(command)
       }
     }
 

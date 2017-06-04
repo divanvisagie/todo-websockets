@@ -19,8 +19,8 @@ class Subscriber(subscriptionHandler: ActorRef) extends Actor{
       log.info(s"Received incoming message $text")
       subscriptionHandler ! SubscriptionHandler.SubscriberMessage(text)
 
-    case SubscriptionHandler.ListUpdatedMessage(text: String) =>
-      log.debug(s"Received list update message $text")
+    case Subscriber.OutgoingMessage(text: String) =>
+      log.info(s"Received outgoing update message $text")
       outgoing ! OutgoingMessage(text)
   }
 }
