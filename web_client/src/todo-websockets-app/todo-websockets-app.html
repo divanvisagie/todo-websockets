@@ -60,6 +60,22 @@
   </template>
 
   <script>
+
+    class SocketAction {
+      constructor(action, collection, data) {
+        this.action     = action
+        this.collection = collection
+        this.data       = data || ""
+      }
+
+      toString() {
+        return JSON.stringify({
+          action: this.action,
+          collection: this.collection,
+          data: this.data
+        })
+      }
+    }
     /**
      * @customElement
      * @polymer
@@ -96,9 +112,9 @@
 
         this.connection.onopen = () => {
           console.log('connected to server')
-          const command = `SUBSCRIBE:todos`
-          console.log(command)
-          this.connection.send(command)
+          const command = new SocketAction('SUBSCRIBE','todos')
+          console.log(command.toString())
+          this.connection.send(command.toString())
         };
 
         this.connection.onmessage = event => {
@@ -110,21 +126,24 @@
         const todoDataPacket = JSON.stringify({
           text: e.detail.todo
         })
-        const command = `ADD:todos => ${todoDataPacket}`
-        console.log(command)
-        this.connection.send(command)
+        const command = new SocketAction('ADD', 'todos', todoDataPacket)
+
+        console.log(command.toString())
+        this.connection.send(command.toString())
       }
       _editTodo(e) {
         const todoDataPacket = JSON.stringify(e.detail.todo)
-        const command = `UPDATE:todos => ${todoDataPacket}`
-        console.log(command)
-        this.connection.send(command)
+        const command = new SocketAction('UPDATE','todos',todoDataPacket)
+
+        console.log(command.toString())
+        this.connection.send(command.toString())
       }
       _deleteTodo(e) {
         const todoDataPacket = JSON.stringify(e.detail.todo)
-        const command = `DELETE:todos => ${todoDataPacket}`
-        console.log(command)
-        this.connection.send(command)
+        const command = new SocketAction('DELETE', 'todos', todoDataPacket)
+
+        console.log(command.toString())
+        this.connection.send(command.toString())
       }
     }
 

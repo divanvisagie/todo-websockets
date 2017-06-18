@@ -3,6 +3,12 @@ package example
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import example.CollectionHandler.{AddMessage, DeleteMessage, UpdateMessage}
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.circe.syntax._
+import io.circe.generic.semiauto._
+import scala.collection.mutable
 
 import scala.collection.mutable
 
@@ -22,22 +28,28 @@ class SubscriptionHandler extends Actor {
     collections(collection) ! CollectionHandler.Subscribe(subscriber)
   }
 
+  def applyAction(messageMetadata: MessageMetadata): Unit ={
+    messageMetadata.action match {
+      case "SUBSCRIBE" =>
+        subscribeToCollection(messageMetadata.collection, sender())
+      case "UPDATE" =>
+        collections(messageMetadata.collection) ! UpdateMessage(messageMetadata.data)
+      case "ADD" =>
+        collections(messageMetadata.collection) ! AddMessage(messageMetadata.data)
+      case "DELETE" =>
+        collections(messageMetadata.collection) ! DeleteMessage(messageMetadata.data)
+      case _ => log.info(s"Action: ${messageMetadata.action} is not a supported action")
+    }
+  }
+
   def receive: Receive = {
     case subscriberMessage: SubscriberMessage =>
-      val messageMetadata = parseSubscriberMessageMetadata(subscriberMessage.message)
-
-      messageMetadata.action match {
-        case "SUBSCRIBE" =>
-          subscribeToCollection(messageMetadata.collection, sender())
-        case "UPDATE" =>
-          collections(messageMetadata.collection) ! UpdateMessage(messageMetadata.data)
-        case "ADD" =>
-          collections(messageMetadata.collection) ! AddMessage(messageMetadata.data)
-        case "DELETE" =>
-          collections(messageMetadata.collection) ! DeleteMessage(messageMetadata.data)
-        case _ => log.info(s"Action: ${messageMetadata.action} is not a supported action")
+      decode[MessageMetadata](subscriberMessage.message) match {
+        case Right(messageMetadata) =>
+          applyAction(messageMetadata)
+        case Left(e) =>
+          log.info(s"Unable to parse subscriber message: ${subscriberMessage.message}, $e")
       }
-
   }
 }
 
@@ -48,27 +60,4 @@ object SubscriptionHandler {
   case class SubscriberMessage(message: String)
   case class ListUpdatedMessage(message: String)
   case class SubscriptionMessage(collection: String)
-
-  def parseSubscriberMessageMetadata(message: String): MessageMetadata = {
-    val splitData = message.split("=>")
-
-    val metaSection = splitData(0).trim
-    val action = metaSection.split(":")(0).trim
-    val collection = metaSection.split(":")(1).trim
-
-    if (splitData.length == 1) {
-      MessageMetadata(
-        action = action,
-        collection = collection,
-        data = ""
-      )
-    } else {
-      val data = splitData(1)
-      MessageMetadata(
-        action = action,
-        collection = collection,
-        data = data.trim
-      )
-    }
-  }
 }

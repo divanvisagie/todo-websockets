@@ -56,10 +56,6 @@ object TodoApp extends App {
   val ip = "0.0.0.0"
   val bindingFuture = Http().bindAndHandle(route, ip, port)
 
-  def sendMessageToClient(): Unit = {
-    subscriptionHandler ! SubscriptionHandler.ListUpdatedMessage("This is your server speaking")
-  }
-
   println(s"Served at http://$ip:$port")
 }
 
