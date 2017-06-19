@@ -18,5 +18,13 @@ Next run the scala application via sbt in the root directory of the project
 sbt run
 ```
 
+Step 3 is to run the mongo server, you can run your own or just spin up
+the provided docker compose file with:
+
+```sh
+docker-compose up
+```
+
+
 Browse to [localhost:5000](http://localhost:5000/)
 
