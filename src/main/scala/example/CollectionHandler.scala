@@ -36,7 +36,6 @@ class CollectionHandler(collectionName: String) extends Actor {
 
   val log = Logging(context.system, this)
   var subscribers: Set[ActorRef] = Set.empty
-  var todos: mutable.Map[String,Todo] = mutable.Map[String,Todo]()
 
   val mongoClient = MongoClient("localhost", 27017)
 
@@ -44,14 +43,13 @@ class CollectionHandler(collectionName: String) extends Actor {
 
   def updateEveryone(): Unit = {
     val jsonString = collectionValues.asJson.toString()
-    val count = todos.values.toList.length
-    log.info(s"updating all $count subscribers with $jsonString")
+    log.info(s"updating all ${collectionValues.length} subscribers with $jsonString")
     subscribers.foreach { subscriber =>
       subscriber ! Subscriber.OutgoingMessage(jsonString)
     }
   }
 
-  val collection = mongoClient("local")(collectionName)
+  private val collection = mongoClient("local")(collectionName)
 
   def collectionValues: Array[Map[String,String]] = {
 
@@ -106,7 +104,8 @@ class CollectionHandler(collectionName: String) extends Actor {
     case DeleteMessage(data) =>
       decode[DeleteTodo](data) match {
         case Right(todo) =>
-          todos.remove(todo.uid)
+          val query = MongoDBObject("uid" -> todo.uid)
+          collection.remove(query)
           updateEveryone()
         case Left(error) =>
           log.info(s"Unable to parse error: $error")
