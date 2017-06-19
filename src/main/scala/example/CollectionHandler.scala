@@ -19,20 +19,10 @@ import org.bson.types.ObjectId
 
 import scala.collection.mutable
 
-case class Todo(uid: String, text: String)
-case class NewTodo(text: String)
-case class DeleteTodo(uid: String)
-
-
-
 class CollectionHandler(collectionName: String) extends Actor {
+  type JsonMessage = Map[String,String]
+
   import CollectionHandler._
-
-  implicit val encodeIntOrString: Encoder[Either[Int, String]] =
-    Encoder.instance(_.fold(_.asJson, _.asJson))
-
-  implicit val decodeIntOrString: Decoder[Either[Int, String]] =
-    Decoder[Int].map(Left(_)).or(Decoder[String].map(Right(_)))
 
   val log = Logging(context.system, this)
   var subscribers: Set[ActorRef] = Set.empty
@@ -51,7 +41,7 @@ class CollectionHandler(collectionName: String) extends Actor {
 
   private val collection = mongoClient("local")(collectionName)
 
-  def collectionValues: Array[Map[String,String]] = {
+  def collectionValues: Array[JsonMessage] = {
 
     val collectionItems = collection.find()
     collectionItems.map { item =>
@@ -79,22 +69,20 @@ class CollectionHandler(collectionName: String) extends Actor {
       subscribers -= subscriber
 
     case AddMessage(data) =>
-      decode[NewTodo](data) match {
-        case Right(todo) =>
-          collection.insert(MongoDBObject(
-            "text" -> todo.text,
-            "uid" -> uuid
-          ))
+      decode[JsonMessage](data) match {
+        case Right(item) =>
+          val dbObject = (item ++ Map("uid" -> uuid)).asDBObject
+          collection.insert(dbObject)
           updateEveryone()
         case Left(error) =>
           log.info(s"Unable to parse new todo: $error")
       }
 
     case UpdateMessage(data) =>
-      decode[Todo](data) match {
-        case Right(todo) =>
-          val query = MongoDBObject("uid" -> todo.uid)
-          val update = $set("text" -> todo.text)
+      decode[JsonMessage](data) match {
+        case Right(item) =>
+          val query = MongoDBObject("uid" -> item("uid"))
+          val update = item.asDBObject
           collection.update(query, update)
           updateEveryone()
         case Left(error) =>
@@ -102,9 +90,9 @@ class CollectionHandler(collectionName: String) extends Actor {
       }
 
     case DeleteMessage(data) =>
-      decode[DeleteTodo](data) match {
-        case Right(todo) =>
-          val query = MongoDBObject("uid" -> todo.uid)
+      decode[JsonMessage](data) match {
+        case Right(item) =>
+          val query = item.asDBObject
           collection.remove(query)
           updateEveryone()
         case Left(error) =>
