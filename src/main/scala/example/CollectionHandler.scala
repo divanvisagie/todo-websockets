@@ -83,7 +83,7 @@ class CollectionHandler(collectionName: String) extends Actor {
       ))
       updateEveryone()
 
-    case DeleteMessage(data, uuid) =>
+    case DeleteMessage(uuid) =>
       val query = MongoDBObject("uuid" -> uuid)
       collection.remove(query)
       updateEveryone()
@@ -94,5 +94,5 @@ object CollectionHandler {
   case class Subscribe(subscriber: ActorRef)
   case class AddMessage(data: String)
   case class UpdateMessage(data: String, uuid: String)
-  case class DeleteMessage(data: String, uuid: String)
+  case class DeleteMessage(uuid: String)
 }

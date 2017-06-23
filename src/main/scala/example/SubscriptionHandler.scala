@@ -32,11 +32,11 @@ class SubscriptionHandler extends Actor {
       case "SUBSCRIBE" =>
         subscribeToCollection(messageMetadata.collection, sender())
       case "UPDATE" =>
-        collections(messageMetadata.collection) ! UpdateMessage(messageMetadata.data)
+        collections(messageMetadata.collection) ! UpdateMessage(messageMetadata.data, messageMetadata.uuid)
       case "ADD" =>
         collections(messageMetadata.collection) ! AddMessage(messageMetadata.data)
       case "DELETE" =>
-        collections(messageMetadata.collection) ! DeleteMessage(messageMetadata.data)
+        collections(messageMetadata.collection) ! DeleteMessage(messageMetadata.uuid)
       case _ => log.info(s"Action: ${messageMetadata.action} is not a supported action")
     }
   }
@@ -54,7 +54,7 @@ class SubscriptionHandler extends Actor {
 
 object SubscriptionHandler {
   case object Join
-  case class MessageMetadata(action: String, collection: String, data: String)
+  case class MessageMetadata(action: String, collection: String, data: String, uuid: String)
 
   case class SubscriberMessage(message: String)
   case class ListUpdatedMessage(message: String)
