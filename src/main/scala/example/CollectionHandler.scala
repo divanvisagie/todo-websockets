@@ -41,19 +41,19 @@ class CollectionHandler(collectionName: String) extends Actor {
 
   private val collection = mongoClient("local")(collectionName)
 
-  def collectionValues: Array[JsonMessage] = {
+  def collectionValues: Array[Json] = {
 
     val collectionItems = collection.find()
     collectionItems.map { item =>
-      val uid = item.get("_id").toString
-      val map = mutable.Map[String,String](
-        "uid" -> uid
-      )
-      item.keySet().forEach { key =>
-        val value = item.get(key).toString
-        if (key != "_id") map += (key -> value)
-      }
-      map.toMap
+      val uuid = item.get("uuid").toString
+
+      val uidJsonString = Json.fromString(uuid)
+      val fields = Iterable(("uuid",uidJsonString))
+      val uidJson = Json.fromFields(fields)
+
+      val data = item.get("data").toString
+      val json = parse(data).getOrElse(Json.Null)
+      uidJson.deepMerge(json)
     }.toArray
   }
 
@@ -69,41 +69,30 @@ class CollectionHandler(collectionName: String) extends Actor {
       subscribers -= subscriber
 
     case AddMessage(data) =>
-      decode[JsonMessage](data) match {
-        case Right(item) =>
-          val dbObject = (item ++ Map("uid" -> uuid)).asDBObject
-          collection.insert(dbObject)
-          updateEveryone()
-        case Left(error) =>
-          log.info(s"Unable to parse new todo: $error")
-      }
+      collection.insert(Map(
+        "uuid" -> uuid,
+        "data" -> data
+      ).asDBObject)
+      updateEveryone()
 
-    case UpdateMessage(data) =>
-      decode[JsonMessage](data) match {
-        case Right(item) =>
-          val query = MongoDBObject("uid" -> item("uid"))
-          val update = item.asDBObject
-          collection.update(query, update)
-          updateEveryone()
-        case Left(error) =>
-          log.info(s"Unable to parse todo: $error")
-      }
+    case UpdateMessage(data, uuid) =>
+      val query = MongoDBObject("uuid" -> uuid)
+      collection.update(query, Map(
+        "uuid" -> uuid,
+        "data" -> data
+      ))
+      updateEveryone()
 
-    case DeleteMessage(data) =>
-      decode[JsonMessage](data) match {
-        case Right(item) =>
-          val query = item.asDBObject
-          collection.remove(query)
-          updateEveryone()
-        case Left(error) =>
-          log.info(s"Unable to parse error: $error")
-      }
+    case DeleteMessage(data, uuid) =>
+      val query = MongoDBObject("uuid" -> uuid)
+      collection.remove(query)
+      updateEveryone()
   }
-
 }
+
 object CollectionHandler {
   case class Subscribe(subscriber: ActorRef)
-  case class UpdateMessage(data: String)
   case class AddMessage(data: String)
-  case class DeleteMessage(data: String)
+  case class UpdateMessage(data: String, uuid: String)
+  case class DeleteMessage(data: String, uuid: String)
 }
